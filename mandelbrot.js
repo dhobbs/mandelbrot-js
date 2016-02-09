@@ -196,6 +196,8 @@ function adjustAspectRatio(xRange, yRange, canvas) {
 let workers = [];
 
 function submitJobs(cores, jobs) {
+    cores = cores || 8;
+
     for (let e of workers) {
         e.terminate();
     }
@@ -206,17 +208,14 @@ function submitJobs(cores, jobs) {
         workers[i] = new Worker('mandelworker.js');
         workers[i].onmessage = function (e) {
             let calcResult = e.data;
-            window.requestAnimationFrame(function(num) {renderLine(calcResult)});
+            window.requestAnimationFrame(function(num) {renderLines(calcResult)});
         }
     }
 
-    for (let i = 0; i < jobs.length; i++) {
-        try {
-            workers[i % workers.length].postMessage(JSON.stringify(jobs[i]));
-        } catch (e) {
-            console.log(e);
-            console.log(JSON.stringify(jobs[i]));
-        }
+    let jobChunks = _.chunk(jobs, 8);
+
+    for (let i = 0; i < jobChunks.length; i++) {
+        workers[i % workers.length].postMessage(JSON.stringify(jobChunks[i]));
     }
 }
 
@@ -234,20 +233,15 @@ function renderLine(result) {
     ctx.putImageData(img, 0, result.sy);
 }
 
-function renderLines(myRenderId, delay) {
-    console.log("Global id: " + renderId + ", myRenderId: " + myRenderId + ", delay: " + delay);
-    if (renderId > myRenderId) {
-        console.log("Terminating render");
-        //terminateWorkers();
-        return;
+function renderLines(results) {
+    let img = ctx.createImageData(canvas.width, results.length);
+    let off = 0;
+    for (let r of results) {
+        for (let x = 0; x < r.data.length;) {
+            img.data[off++] = r.data[x++];
+        }
     }
-    var r;
-    while (r = calcResults.pop()) {
-        window.requestAnimationFrame(function(num) {renderLine(r);});
-    }
-    setTimeout(function () {
-        renderLines(myRenderId, delay)
-    }, delay);
+    ctx.putImageData(img, 0, results[0].sy);
 }
 
 function draw(colorScheme, superSamples) {
@@ -333,7 +327,7 @@ function draw(colorScheme, superSamples) {
             sy++;
         }
 
-        submitJobs(4, calcRequests);
+        submitJobs(navigator.hardwareConcurrency, calcRequests);
     }
 
     function scanline(sy, Ci, Ci_step, xRange, dx, superSamples, width, colorScheme, steps, imageData, context2D) {

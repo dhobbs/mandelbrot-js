@@ -18,11 +18,16 @@ function process(e) {
     //    steps: steps
     //};
 
-    let req = JSON.parse(e.data);
+    let reqs = JSON.parse(e.data);
 
-    var result = calcLineSuperSampled(req.sy, req.Ci, req.Ci_step,  req.offset, req.crInit, req.crStep, req.samples, req.width, req.colorScheme, req.steps, req.escapeRadius);
+    let results = [];
+    for (let req of reqs) {
+        var result = calcLineSuperSampled(req.sy, req.Ci, req.Ci_step,  req.offset, req.crInit, req.crStep, req.samples, req.width, req.colorScheme, req.steps, req.escapeRadius);
+        results.push(result);
+    }
 
-    self.postMessage(result);
+    self.postMessage(results);
+
 }
 
 self.addEventListener('message', function (e) {
