@@ -9,7 +9,7 @@ const lookAtDefault = [-0.6, 0];
 let lookAt = lookAtDefault;
 let xRange = [0, 0];
 let yRange = [0, 0];
-let escapeRadius = 10.0;
+let escapeRadius = 100.0;
 let reInitCanvas = true; // Whether to reload canvas size, etc
 let dragToZoom = true;
 let colors = [[0, 0, 0, 0]];
@@ -25,9 +25,14 @@ let ccanvas;
 let ctx;
 //let img;
 
+let cores = navigator.hardwareConcurrency || 4;
+let workers = [];
+
 function reInitialiseCanvas() {
     console.log("Reinit canvas");
     reInitCanvas = false;
+
+    resetWorkers(workers);
 
     canvas = $('canvasMandelbrot');
     canvas.width = window.innerWidth;

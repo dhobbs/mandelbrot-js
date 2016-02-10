@@ -181,7 +181,7 @@
         <tr>
           <td>Escape radius</td>
           <td> <input class="textInput" size="4" type="text"
-            id="escapeRadius" value="10.0" /> </td>
+            id="escapeRadius" value="100.0" /> </td>
         </tr>
         <tr>
           <td>Color scheme</td>
@@ -197,7 +197,7 @@
         </tr>
         <tr>
           <td>Supersamples</td>
-          <td><input class="textInput" size="4" type="text" id="superSamples" value="1" /></td>
+          <td><input class="textInput" size="4" type="text" id="superSamples" value="512" /></td>
         </tr>
         <tr>
           <td>Scanline update (ms)</td>
@@ -242,8 +242,14 @@
     </div>
 
     <script type="application/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.3.0/lodash.min.js"></script>
+
+    <!--Websockets!-->
+    <script src="/socket.io/socket.io.js"></script>
+
     <script type="text/javascript" src="mandelbrotCalc.js"></script>
     <script type="text/javascript" src="mandelbrot.js"></script>
+
+
     <script type="text/javascript" src="main.js"></script>
   </body>
 </html>

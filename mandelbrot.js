@@ -112,7 +112,7 @@ function readHashTag() {
 
             case 'superSamples':
             {
-                $('superSamples').value = String(parseInt(val, 10));
+                $('superSamples').value = String(parseInt(val, 512));
                 redraw = true;
             }
                 break;
@@ -193,30 +193,35 @@ function adjustAspectRatio(xRange, yRange, canvas) {
     }
 }
 
-let workers = [];
+function resetWorkers(workers) {
+    console.log('reset workers');
 
-function receiveResults(e) {
-    let calcResult = JSON.parse(e.data);
-    window.requestAnimationFrame(function (num) {
-        renderLines(calcResult)
-    });
-}
-
-function submitJobs(cores, jobs) {
-    cores = cores || 8;
-
-    for (let e of workers) {
-        e.terminate();
+    for (let worker of workers) {
+        worker.terminate();
     }
 
-    workers = [];
+    while (workers.length) {
+        workers.pop();
+    }
 
     for (let i = 0; i < cores; i++) {
         workers[i] = new Worker('mandelworker.js');
         workers[i].onmessage = receiveResults;
     }
+}
 
-    let jobChunks = _.chunk(jobs, 4);
+
+function receiveResults(e) {
+    let calcResult = e.data;
+    window.requestAnimationFrame(function (num) {
+        renderLines(calcResult)
+    });
+}
+
+function submitJobs(jobs) {
+    let jobChunks = _.chunk(jobs, 2);
+
+    console.log('Sending ' + jobChunks.length + " jobs");
 
     for (let i = 0; i < jobChunks.length; i++) {
         workers[i % workers.length].postMessage(JSON.stringify(jobChunks[i]));
@@ -337,7 +342,7 @@ function draw(colorScheme, superSamples) {
             sy++;
         }
 
-        submitJobs(navigator.hardwareConcurrency, calcRequests);
+        submitJobs(calcRequests);
     }
 
     function scanline(sy, Ci, Ci_step, xRange, dx, superSamples, width, colorScheme, steps, imageData, context2D) {
