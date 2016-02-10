@@ -35,10 +35,10 @@ function process(e) {
 
 self.addEventListener('message', process, false);
 
-const socket = io();
+let socket = io();
 
 socket.on('handle request', handleRequest);
-socket.on('handle response', handleResponse);
+socket.on('handle response',handleResponse);
 
 function handleRequest(msg) {
     console.log('Handling request from server');
