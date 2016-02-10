@@ -51,23 +51,23 @@ function iterateEquation(Cr, Ci, escapeRadius, iterations) {
     return [n, Tr, Ti];
 }
 
-function calcLineSuperSampled(sy, Ci, Ci_step, off, Cr_init, Cr_step, superSamples, width, colorScheme, steps, escapeRadius) {
-    let pickColor = getColorPicker(colorScheme);
+function calcLineSuperSampled(req) {
+    let pickColor = getColorPicker(req.colorScheme);
 
-    let result = {data: [], off: off, width: width, sy: sy};
+    let result = {data: [], off: req.off, width: req.width, sy: req.sy};
 
-    let samples = Math.min(2, superSamples);
-    let Cr = Cr_init;
+    let samples = Math.min(2, req.superSamples);
+    let cr = req.crInit;
 
     let pixelCount = 0;
-    for (let x = 0; x < width; ++x, Cr += Cr_step) {
+    for (let x = 0; x < req.width; ++x, cr += req.crStep) {
         let color = [0, 0, 0, 255];
 
         for (let s = 0; s < samples; ++s) {
-            let rx = Math.random() * Cr_step;
-            let ry = Math.random() * Ci_step;
-            let p = iterateEquation(Cr - rx / 2, Ci - ry / 2, escapeRadius, steps);
-            color = addRGB(color, pickColor(steps, p[0], p[1], p[2]));
+            let rx = Math.random() * req.crStep;
+            let ry = Math.random() * req.ciStep;
+            let p = iterateEquation(cr - rx / 2, req.ci - ry / 2, req.escapeRadius, req.steps);
+            color = addRGB(color, pickColor(req.steps, p[0], p[1], p[2]));
         }
 
         color = divRGB(color, samples);

@@ -195,6 +195,13 @@ function adjustAspectRatio(xRange, yRange, canvas) {
 
 let workers = [];
 
+function receiveResults(e) {
+    let calcResult = JSON.parse(e.data);
+    window.requestAnimationFrame(function (num) {
+        renderLines(calcResult)
+    });
+}
+
 function submitJobs(cores, jobs) {
     cores = cores || 8;
 
@@ -206,13 +213,10 @@ function submitJobs(cores, jobs) {
 
     for (let i = 0; i < cores; i++) {
         workers[i] = new Worker('mandelworker.js');
-        workers[i].onmessage = function (e) {
-            let calcResult = e.data;
-            window.requestAnimationFrame(function(num) {renderLines(calcResult)});
-        }
+        workers[i].onmessage = receiveResults;
     }
 
-    let jobChunks = _.chunk(jobs, 8);
+    let jobChunks = _.chunk(jobs, 4);
 
     for (let i = 0; i < jobChunks.length; i++) {
         workers[i % workers.length].postMessage(JSON.stringify(jobChunks[i]));
@@ -227,7 +231,10 @@ function renderLine(result) {
     let off = result.off;
     let img = ctx.createImageData(canvas.width, 1);
     for (let x = 0; x < result.data.length;) {
-        img.data[off++] = result.data[x++]
+        img.data[off++] = result.data[x++];
+        img.data[off++] = result.data[x++];
+        img.data[off++] = result.data[x++];
+        img.data[off++] = result.data[x++];
     }
 
     ctx.putImageData(img, 0, result.sy);
@@ -238,6 +245,9 @@ function renderLines(results) {
     let off = 0;
     for (let r of results) {
         for (let x = 0; x < r.data.length;) {
+            img.data[off++] = r.data[x++];
+            img.data[off++] = r.data[x++];
+            img.data[off++] = r.data[x++];
             img.data[off++] = r.data[x++];
         }
     }
@@ -310,12 +320,12 @@ function draw(colorScheme, superSamples) {
 
             calcRequests.push({
                 sy: sy,
-                Ci: Ci,
-                Ci_step: Ci_step,
+                ci: Ci,
+                ciStep: Ci_step,
                 offset: 0,
                 crInit: xRange[0],
                 crStep: dx,
-                samples: superSamples,
+                superSamples: superSamples,
                 width: width,
                 colorScheme: colorScheme,
                 steps: steps,
