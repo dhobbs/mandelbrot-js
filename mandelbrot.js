@@ -219,7 +219,7 @@ function receiveResults(e) {
 }
 
 function submitJobs(jobs) {
-    let jobChunks = _.chunk(jobs, 2);
+    let jobChunks = _.chunk(jobs, 8);
 
     console.log('Sending ' + jobChunks.length + " jobs");
 
